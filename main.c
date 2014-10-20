@@ -12,15 +12,18 @@
 #include <sys/sem.h>
 int main(){
 
+    if(argc != 3)
+        return 0;
+
     pid_t pp = fork();
-    if(pp == 0){
-        printf( "statrt p \n" );
-        if(execl("./p",(char *)0) < 0){
+    if(pp == 0){//child
+        printf( "start %s \n",argv[1] );
+        if(execl(argv[1],(char *)0) < 0){
             perror("execl error!");
         }
-    }else{
-        printf( "statrt c \n" );
-        if(execl("./c",(char *)0) < 0){
+    }else{//father
+        printf( "start %s \n",argv[2] );
+        if(execl(argv[2],(char *)0) < 0){
             perror("execl error!");
         }
     }
