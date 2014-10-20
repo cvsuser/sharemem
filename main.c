@@ -1,4 +1,60 @@
 
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <unistd.h>
+#include <errno.h>
+#include <unistd.h>
+
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/sem.h>
+int main(){
+
+    pid_t pp = fork();
+    if(pp == 0){
+        printf( "statrt p \n" );
+        if(execl("./p",(char *)0) < 0){
+            perror("execl error!");
+        }
+    }else{
+        printf( "statrt c \n" );
+        if(execl("./c",(char *)0) < 0){
+            perror("execl error!");
+        }
+    }
+    return 0;
+}
+int maintest(){
+    key_t magicword = ftok("./main.c", 83);
+    printf( "page size=%d\n",getpagesize());
+
+    int shmid = shmget(magicword , getpagesize()*200 , 0666|IPC_CREAT);
+
+    if( shmid > 0 )
+        printf( "Create a shared memory segment %d \n",shmid );
+
+    struct shmid_ds shmds;
+    int ret = shmctl( shmid,IPC_STAT,&shmds );
+    if( ret == 0 ) {
+        printf( "Size of memory segment is %ld\n",shmds.shm_segsz );
+        printf( "Numbre of attaches %d\n",( int )shmds.shm_nattch );
+    }
+    else {
+        printf( "shmctl(  ) call failed\n" );
+    }
+
+    ret = shmctl( shmid,IPC_RMID,0 );
+    if( ret == 0 )
+        printf( "Shared memory removed \n" );
+    else
+        printf( "Shared memory remove failed \n" );
+    return 0;
+
+    return printf("ret = %x\n",ret);
+}
+
 /*
 http://www.cnblogs.com/hicjiajia/archive/2012/05/17/2506638.html
 http://www.cnblogs.com/hicjiajia/archive/2012/05/17/2506632.html
@@ -13,19 +69,4 @@ http://blog.csdn.net/brucexu1978/article/details/7728717
 http://blog.csdn.net/liuhongxiangm/article/details/8308291
 http://blog.csdn.net/ljianhui/article/details/10253345
 */
-#include <sys/ipc.h>
-#include <sys/shm.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-int main(){
-	key_t magicword = ftok("./main.c", 83);
-	printf( "page size=%d\n",getpagesize());
-	
-	int ret = shmget(magicword , getpagesize()*200 , 0666|IPC_CREAT);
-	
-	
-	return printf("ret = %x\n",ret);
-}
 
